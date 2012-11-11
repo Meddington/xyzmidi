@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mappings>
+
+	<!--<mappingset id="liveControls" permanent="true" inScope="false">-->
+	<mappingset id="liveControls" permanent="true">
+
+		<mapping id="start">
+			<processor type="boolean" effect="toggle" filter="less_than">
+				<element type="joint" target="left_hand" property="position" axis="z" />
+				<element type="value" value="1900" />
+			</processor>
+
+			<!--<processor type="boolean" effect="trigger" filter="less_than">
+				<element type="joint" target="left_hand" property="position" axis="z" />
+				<element type="value" value="1900" />
+			</processor>-->
+			<output>
+				<midi type="controller" channel="2" valueMap="1" />
+			</output>
+		</mapping>
+
+	</mappingset>
+
+
+	<mappingset id="Default">
+		<mapping id="volume">
+			
+			<processor type="filtered" filter="gate" inactive="standby" minValue="200" maxValue="800">
+				
+				<processor type="distance" label="Volume">
+					<element type="joint" target="left_hand" />
+					<element type="joint" target="right_hand" />
+				</processor>
+				
+				<processor type="boolean" filter="less_than">
+					<element type="joint" target="left_hand" axis="z" />
+					<element type="value" value="1000" />
+				</processor>
+				
+			</processor>
+			
+			<output>
+				<midi type="controller" channel="3" valueMap="1" />
+			</output>
+		</mapping>
+
+	</mappingset>
+	
+</mappings>
+
+<!-- end -->
