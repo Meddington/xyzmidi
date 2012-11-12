@@ -8,6 +8,9 @@ namespace xyzmidi.core
 {
 	public abstract class MappingProcessor : IRawValueProvider
 	{
+		public string Id { get; set; }
+		public string Label { get; set; }
+
 		public List<IRawValueProvider> providers = new List<IRawValueProvider>();
 		public List<MappingElement> elements = new List<MappingElement>();
 		public List<MappingProcessor> processors = new List<MappingProcessor>();
@@ -20,5 +23,7 @@ namespace xyzmidi.core
 		public abstract Vector4? GetRawVector();
 
 		public int Axis { get; set; }
+
+
 	}
 }
