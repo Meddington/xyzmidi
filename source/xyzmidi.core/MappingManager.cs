@@ -143,7 +143,7 @@ namespace xyzmidi.core
 				var processor = ReadXmlProcessor(xmlMap.SelectSingleNode("/Processor"), null);
 				var outputs = ReadXmlOutputs(xmlMap.SelectSingleNode("/Output"));
 
-				var mapping = new Mapping(id, label, processor, outputs);
+				var mapping = new Mapping(id, label, processor, outputs.ToArray());
 				_mappings.Add(mapping);
 			}
 		}

@@ -11,7 +11,7 @@ namespace xyzmidi.core
 		public const int NOTE = 0;
 		public const int CONTROLLER = 1;
 
-		public const string[] midiTypesToken = { "note", "controller" };
+		public static readonly string[] midiTypesToken = { "note", "controller" };
 		//PROCESSOR
 
 		public const int NONE = 0; //For multiple use
@@ -56,13 +56,13 @@ namespace xyzmidi.core
 		public const int KEEP_VALUE = 0;
 		public const int STANDBY = 2;
 
-		public const string[] processorTypesToken = { "direct", "mapped", "distance", "rotation", "boolean", "conditionnal", "filtered", "action", "multi" };
-		public const string[] processorFiltersToken = { "none", "less_than", "greater_than", "between", "lowest", "greatest", "average", "gate", "sum", "minus" };
-		public const string[] processorOperatorsToken = { "and", "or" };
-		public const string[] processorOverflowsToken = { "none", "zero", "clip", "loop" };
-		public const string[] processorEffectsToken = { "none", "trigger", "toggle" };
-		public const string[] processorActionsToken = { "none", "changeSet", "nextSet", "prevSet" };
-		public const string[] processorInactiveToken = { "keepValue", "zero", "standby" };
+		public static readonly string[] processorTypesToken = { "direct", "mapped", "distance", "rotation", "boolean", "conditionnal", "filtered", "action", "multi" };
+		public static readonly string[] processorFiltersToken = { "none", "less_than", "greater_than", "between", "lowest", "greatest", "average", "gate", "sum", "minus" };
+		public static readonly string[] processorOperatorsToken = { "and", "or" };
+		public static readonly string[] processorOverflowsToken = { "none", "zero", "clip", "loop" };
+		public static readonly string[] processorEffectsToken = { "none", "trigger", "toggle" };
+		public static readonly string[] processorActionsToken = { "none", "changeSet", "nextSet", "prevSet" };
+		public static readonly string[] processorInactiveToken = { "keepValue", "zero", "standby" };
   
 		//ELEMENT
   
@@ -82,9 +82,9 @@ namespace xyzmidi.core
 		public const int YZ = 5;
 		public const int VECTOR3D = 6;
 
-		public const string[] mappingElementTypesToken = { "joint", "point", "value" };
-		public const string[] propertiesToken = { "position", "velocity", "acceleration" };
-		public const string[] axisToken = { "x", "y", "z", "xy", "xz", "yz", "3d" };
+		public static readonly string[] mappingElementTypesToken = { "joint", "point", "value" };
+		public static readonly string[] propertiesToken = { "position", "velocity", "acceleration" };
+		public static readonly string[] axisToken = { "x", "y", "z", "xy", "xz", "yz", "3d" };
   
   
 		// FEEDBACK

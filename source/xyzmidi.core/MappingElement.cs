@@ -40,7 +40,7 @@ namespace xyzmidi.core
 			}
 		}
 
-		public float GetRawValue()
+		public virtual float GetRawValue()
 		{
 			switch (Type)
 			{
@@ -51,14 +51,14 @@ namespace xyzmidi.core
 					return Value;
 
 				case Tokens.JOINT:
-					return GetJointValue(getTargetUser(), target, axis);
+					return GetJointValue(GetTargetUser(), Target, Axis);
 			}
 
 			//println("## MappingElement => getDirectValue : type not handled -> " + type);
 			return 0;
 		}
 
-		public Vector4? GetRawVector()
+		public virtual Vector4? GetRawVector()
 		{
 			switch (Type)
 			{

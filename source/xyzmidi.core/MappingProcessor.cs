@@ -19,9 +19,6 @@ namespace xyzmidi.core
 		public bool IsGroup { get; set; }
 		public bool IsActive { get; set; }
 
-		public abstract float GetRawValue();
-		public abstract Vector4? GetRawVector();
-
 		public int Axis
 		{
 			get
