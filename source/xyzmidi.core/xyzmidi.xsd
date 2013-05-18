@@ -18,6 +18,27 @@
 			<xs:choice>
 				<xs:element name="Mapping" minOccurs="1" maxOccurs="unbounded" />
 			</xs:choice>
+
+			<xs:attribute name="id" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Id of the mapping set. Required if multiple mapping sets are used. Must be unique.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shortcut" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Keyboard shortcut of the mapping set. Allow to launch the mapping set via the keyboard. Must be only 1 character. Optional.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="permanent" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Boolean to choose wether the mapping set is a permanent mapping (i. e. loaded even if the chosen set is not this) or not. Useful for action processors that need to stick in a mapping sequence. Default false.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="inScope" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Boolean to choose wether the mappingset is used in the scope for nextSet action and default set loading. If set to false, when loading this set as current Set, the next set in the scope will be loaded. Useful for permanent sets that you don't want to load alone, or for mappings you want to access only via their id. Default true. /!\ At least one mapping set must be inScope, otherwise the processing will get in an infinite loop, search over and over for an inScope set.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="Mapping">
@@ -26,6 +47,8 @@
 				<xs:element name="Processor" minOccurs="1" maxOccurs="1" />
 				<xs:element name="Output" minOccurs="1" maxOccurs="1" />
 			</xs:choice>
+			<xs:attribute name="id" type="xs:string"/>
+			<xs:attribute name="label" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="Processor">
@@ -34,6 +57,274 @@
 				<xs:element name="Processor" minOccurs="0" maxOccurs="unbounded" />
 				<xs:element name="Element" minOccurs="0" maxOccurs="unbounded" />
 			</xs:choice>
+
+			<xs:attribute name="id" type="xs:string"/>
+			<xs:attribute name="label" type="xs:string"/>
+			<xs:attribute name="type">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="direct">
+							<xs:annotation>
+								<xs:documentation>Values are passed directly to the output without using the min/max values. Useful for getting the 3d coordinates of the joints through the network. Be careful with midi output. Can be nested. Default.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="mapped">
+							<xs:annotation>
+								<xs:documentation>Simple value mapping from one element property to a midi value.  Can be nested.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="distance">
+							<xs:annotation>
+								<xs:documentation>
+									Distance between 2 elements. Default min_value change to 0. Default max_value is change to 1000. /!\ Can't nest processors inside, must be direct element objects</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="rotation">
+							<xs:annotation>
+								<xs:documentation>
+									Rotation between 2 elements. Default min_value is changed to 0. Default max_value is change to 360. /!\ Can't nest processors inside, must be direct element objects.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="timed">
+							<xs:annotation>
+								<xs:documentation>Tween a value from the min_value to max_value in the predefined time (NOT IMPLEMENTED YET)</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="filtered">
+							<xs:annotation>
+								<xs:documentation>Sends a gradient value (unlike boolean or conditionnal type) depending on the filter and the inactive parameter. Can be nested. See below for available filters for this type.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="boolean">
+							<xs:annotation>
+								<xs:documentation>Sends either min_value or max_value depending on a (boolean) filter. Default min_value is changed to 0. Default max_value is change to 1. Can be nested.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="conditionnal">
+							<xs:annotation>
+								<xs:documentation>Allows to have multiple processors nested with a conditionnal token ("and", "or"). Can be nested.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="action">
+							<xs:annotation>
+								<xs:documentation>Triggers an action when a positive value is passed. See below available actions.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="effect">
+				<xs:annotation>
+					<xs:documentation>If processor is boolean / conditionnal. Optional</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="noeffect">
+							<xs:annotation>
+								<xs:documentation>Boolean standard effect. Default.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="trigger">
+							<xs:annotation>
+								<xs:documentation>Makes bang-like effect with a boolean processor. Sends always min_value until the filter is validated, then throws once max_value and comes back to sending 0 until the filter is off and validated again. </xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="toggle">
+							<xs:annotation>
+								<xs:documentation>Makes a toggle-like effect with a boolean processor. When the filter is validated, switches the value between min_value and max_value.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="filter">
+				<xs:annotation>
+					<xs:documentation>If processor requires filter. Filters are operators that return either 0 or 1. This value is then used by the processor to send the final value.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="greater_than">
+							<xs:annotation>
+								<xs:documentation>If 1st element is bigger than 2nd element (NOT for type "filtered")</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="less_than">
+							<xs:annotation>
+								<xs:documentation>If 1st element is smaller than 2nd element (NOT for type "filtered")</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="between">
+							<xs:annotation>
+								<xs:documentation>If 1st element is bigger than 2nd element and less than 3rd element (NOT for type "filtered")</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="greatest">
+							<xs:annotation>
+								<xs:documentation>returns the biggest value from all the nested processors / elements. (Only for type "filtered")</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="lowest">
+							<xs:annotation>
+								<xs:documentation>returns the lowest value from all the nested processors / elements. (Only for type "filtered")</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="average">
+							<xs:annotation>
+								<xs:documentation>returns the average value of all the nested processors / elements.( Only for type "filtered")</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="gate">
+							<xs:annotation>
+								<xs:documentation>returns the value of the 1st child only if the 2nd child is greater than 0 (preferrably use a boolean/conditionnal processor for the 2nd child)(Only for type "filtered")</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="operator">
+				<xs:annotation>
+					<xs:documentation>If processor is "conditionnal".</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="and">
+							<xs:annotation>
+								<xs:documentation>AND operator. The processor will return 1 if all the nested processors returns 1. Default.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="or">
+							<xs:annotation>
+								<xs:documentation>OR operator. The processor will return 1 if at least one processor returns 1.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="min_value" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Value sent when boolean (or trigger) filter does not pass. Default -500 (for direct joint x/y position easy mapping)</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max_value" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Value sent boolean (or trigger) filter passes. Default 500 (for direct joint x/y position easy mapping)</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="overflow">
+				<xs:annotation>
+					<xs:documentation>If processor is anything but "direct" and boolean type</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="none">
+							<xs:annotation>
+								<xs:documentation>No filtering applied. If a value is outside it's limit, it will continue to change proportionnally to the mapping range set up. Be careful with midi output.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="clip">
+							<xs:annotation>
+								<xs:documentation>If a value is outside it's limit, it will be constraint at the value's limit (0 || 0->127 || 127). Default.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="loop">
+							<xs:annotation>
+								<xs:documentation>If a value is outside it's limit, it will continue to change but starting from it's opposite limit, like a loop effect (0->127 || 0->127 || 0->127).</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="zero">
+							<xs:annotation>
+								<xs:documentation>If a value is outside the limit, it will be considered as 0 (0 || 0->127 || 0).</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="axis">
+				<xs:annotation>
+					<xs:documentation>The 1D or 2D axis of the joints. If not set, processor's axis will be used.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="x"/>
+						<xs:enumeration value="y"/>
+						<xs:enumeration value="z"/>
+						<xs:enumeration value="xy"/>
+						<xs:enumeration value="xz"/>
+						<xs:enumeration value="yz"/>
+						<xs:enumeration value="3d"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="inactive">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="zero">
+							<xs:annotation>
+								<xs:documentation>If the condition processor (the 2nd child processor) returns false, the value passed will be 0. Default.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="keepValue">
+							<xs:annotation>
+								<xs:documentation>If the condition processor (the 2nd child processor) returns false, the value passed will be the last value computed when the condition processor was active.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="standby">
+							<xs:annotation>
+								<xs:documentation>If the condition processor (the 2nd child processor) returns false, the whole mapping won't send anything. If a "multi" processor is used, any inactive processor will return 0 and  the mapping will stop sending when all the child processors are inactive.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="time" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>time in milliseconds that will be used to tween the value to min_value to max_value</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="action">
+				<xs:annotation>
+					<xs:documentation>If processor is action</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="changeSet">
+							<xs:annotation>
+								<xs:documentation>Changes the mapping set to the specified file and setId (see below)</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="prevSet">
+							<xs:annotation>
+								<xs:documentation>Change the set to the previous child in scope. If last child is reached, nextSet load the 1st child in scope.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="nextSet">
+							<xs:annotation>
+								<xs:documentation>Change the set to the next child in scope. If last child is reached, nextSet load the 1st child in scope.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="file" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The name of the file to be loaded. The file must be in the /data folder. if not specified, the current file will be used. "mappings.xml" is the default loaded file.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="set" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>the set ID to load. if not set, the first mapping set in the scope will be used.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="showFeedback" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Boolean to choose wether to display the processor's feedback or not. Default true.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="labelFeedback" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Boolean to choose wether to display the processor's label feedback. Only use when showFeedback is set to true and label is set. Default true.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="Element">
@@ -41,7 +332,7 @@
 			<xs:attribute name="type">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
-						<xs:enumeration value="joit">
+						<xs:enumeration value="joint">
 							<xs:annotation>
 								<xs:documentation>A Skeleton Joint</xs:documentation>
 							</xs:annotation>
@@ -59,8 +350,131 @@
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:attribute>
+			<xs:attribute name="userId" type="xs:int" />
+			<xs:attribute name="target">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="head"/>
+						<xs:enumeration value="neck"/>
+						<xs:enumeration value="torso"/>
+						<xs:enumeration value="left_shoulder"/>
+						<xs:enumeration value="right_shoulder"/>
+						<xs:enumeration value="left_elbow"/>
+						<xs:enumeration value="right_elbow"/>
+						<xs:enumeration value="left_hand"/>
+						<xs:enumeration value="right_hand"/>
+						<xs:enumeration value="left_hip"/>
+						<xs:enumeration value="right_hip"/>
+						<xs:enumeration value="left_knee"/>
+						<xs:enumeration value="left_foot"/>
+						<xs:enumeration value="right_foot"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="property">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="position">
+							<xs:annotation>
+								<xs:documentation>The 3d Position of the point.</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="velocity">
+							<xs:annotation>
+								<xs:documentation>Velocity of a joint, filtered by coordinates (1D, 2D or 3D).</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="acceleration">
+							<xs:annotation>
+								<xs:documentation>Acceleration of the joint (same filtering system as velocity).</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="axis">
+				<xs:annotation>
+					<xs:documentation>The 1D or 2D axis of the joints. If not set, processor's axis will be used.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="x"/>
+						<xs:enumeration value="y"/>
+						<xs:enumeration value="z"/>
+						<xs:enumeration value="xy"/>
+						<xs:enumeration value="xz"/>
+						<xs:enumeration value="yz"/>
+						<xs:enumeration value="3d"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string" />
+			<xs:attribute name="x" type="xs:int">
+				<xs:annotation>
+					<xs:documentation>the 3 coordinates to define for the 3D Point (e.g. x="10" y="-300" z="1500"). Units relative to the Kinect's environment (in centimeters). Default 0,0,0.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y" type="xs:int">
+				<xs:annotation>
+					<xs:documentation>the 3 coordinates to define for the 3D Point (e.g. x="10" y="-300" z="1500"). Units relative to the Kinect's environment (in centimeters). Default 0,0,0.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="z" type="xs:int">
+				<xs:annotation>
+					<xs:documentation>the 3 coordinates to define for the 3D Point (e.g. x="10" y="-300" z="1500"). Units relative to the Kinect's environment (in centimeters). Default 0,0,0.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="Output" />
+	<xs:element name="Output">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="Midi" minOccurs="1" maxOccurs="1" />
+				<xs:element name="Osc" minOccurs="1" maxOccurs="1" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Midi">
+		<xs:complexType>
+			<xs:attribute name="type">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="note"/>
+						<xs:enumeration value="controller"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:int"/>
+			<xs:attribute name="device" type="xs:int"/>
+			<xs:attribute name="deviceMap" type="xs:int"/>
+			<xs:attribute name="channel" type="xs:int"/>
+			<xs:attribute name="channelMap" type="xs:int"/>
+			<xs:attribute name="velocityMap" type="xs:int"/>
+			<xs:attribute name="minChannel" type="xs:int"/>
+			<xs:attribute name="maxChannel" type="xs:int"/>
+			<xs:attribute name="minVelocity" type="xs:int"/>
+			<xs:attribute name="maxVelocity" type="xs:int"/>
+			<xs:attribute name="distinctNotes" type="xs:boolean"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Osc">
+		<xs:complexType>
+			<xs:attribute name="host" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The host to which send the OSC messages. Default set in config.xml.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="address" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The address to which send the OSC messages. Final address will be the concatenation of addressPrefix set in config.xml and this value. Default "".</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="port" type="xs:int">
+				<xs:annotation>
+					<xs:documentation>The port to which send the OSC messages. Default set in config.xml.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
 	
 </xs:schema>

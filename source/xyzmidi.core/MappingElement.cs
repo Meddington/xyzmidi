@@ -6,7 +6,7 @@ using Microsoft.Kinect;
 
 namespace xyzmidi.core
 {
-	public abstract class MappingElement :IRawValueProvider
+	public class MappingElement :IRawValueProvider
 	{
 		public int Axis { get; set; }
 		public int Type { get; set; }

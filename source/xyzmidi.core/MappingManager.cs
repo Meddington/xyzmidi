@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Microsoft.Kinect;
 
 namespace xyzmidi.core
 {
@@ -17,7 +18,7 @@ namespace xyzmidi.core
 		char[] _shortcuts;
 		XmlDocument _doc;
 		XmlNodeList _xmlSets;
-		Mapping[] _mappings;
+		List<Mapping> _mappings = new List<Mapping>();
 
 		public MappingManager()
 		{
@@ -122,7 +123,7 @@ namespace xyzmidi.core
 
 			_currentSetId = set.Attributes["id"].Value;
 			CurrentSetIndex = IndexOfSet(set);
-			_mappings = new Mapping[0];
+			_mappings.Clear();
 
 			if (!AttrAsBool(set, "permanent", false))
 				ProcessSet(set);
@@ -131,7 +132,6 @@ namespace xyzmidi.core
 		void ProcessSet(XmlNode set)
 		{
 			var xmlMappings = set.SelectNodes("/Mapping");
-			var setMappings = new Mapping[xmlMappings.Count];
 
 			for (int cnt = 0; cnt < xmlMappings.Count; cnt++)
 			{
@@ -140,9 +140,26 @@ namespace xyzmidi.core
 				string id = xmlMap.Attributes["id"].Value;
 				string label = AttrAsString(xmlMap, "label", "");
 
-				var processor =   // TODO -- FInish me
+				var processor = ReadXmlProcessor(xmlMap.SelectSingleNode("/Processor"), null);
+				var outputs = ReadXmlOutputs(xmlMap.SelectSingleNode("/Output"));
 
+				var mapping = new Mapping(id, label, processor, outputs);
+				_mappings.Add(mapping);
 			}
+		}
+
+		public void ReadPermanentSets()
+		{
+			//println("---- Begin Read Permanent Sets --------");
+			int permanents = 0;
+			foreach(XmlNode set in _xmlSets)
+			{
+				if (AttrAsBool(set,"permanent", false))
+				{
+					ProcessSet(set);
+				}
+			}
+			//println("---- End Read Permenent Sets, total Permanent Sets : " + permanents + "----------");
 		}
 
 		MappingProcessor ReadXmlProcessor(XmlNode xmlProc, MappingProcessor parentProcessor)
@@ -166,7 +183,7 @@ namespace xyzmidi.core
 
 			string inactive = AttrAsString(xmlProc, "inactive", "null");
 			
-			string parentAxis = parentProcessor != null ? : "x";
+			string parentAxis = parentProcessor != null ? Tokens.axisToken[parentProcessor.Axis] : "x";
 			string axis = AttrAsString(xmlProc, "axis", parentAxis);
 
 			var p = new MappingProcessor(
@@ -183,7 +200,60 @@ namespace xyzmidi.core
 				action,
 				inactive);
 
-			// TODO - FInish me
+			if(minValue != -5555)
+				p.MinValue = minValue;
+			if(maxValue != -5555)
+				p.MaxValue = maxValue;
+			if(p.Action != Tokens.NONE)
+			{
+				p.File = file;
+				p.SetId = setId;
+			}
+
+			var elems = new List<MappingElement>();
+			foreach(XmlNode element in xmlProc.SelectNodes("/Element"))
+				elems.Add(ReadXmlElement(element, p));
+
+			if(elems.Count >  0)
+			{
+				p.elements = elems;
+				p.SetGroup(false);
+			}
+
+			var procs = new List<MappingProcessor>();
+			foreach(XmlNode processor in xmlProc.SelectNodes("/Processor"))
+				procs.Add(ReadXmlProcessor(processor, p));
+
+			if(procs.Count > 0)
+			{
+				p.processors = procs;
+				p.SetGroup(true);
+			}
+
+			return p;
+		}
+
+		MappingElement ReadXmlElement(XmlNode xmlElem, MappingProcessor parentProcessor)
+		{
+			return new MappingElement(
+				xmlElem.Attributes["type"].Value,
+				int.Parse(AttrAsString(xmlElem, "userId", "0")),
+				xmlElem.Attributes["target"].Value,
+				AttrAsString(xmlElem, "property", "position"),
+				AttrAsString(xmlElem, "axis", ((parentProcessor != null) ? Tokens.axisToken[parentProcessor.Axis] : "x")),
+				int.Parse(AttrAsString(xmlElem, "value", "0")),
+				new Vector4()
+					{
+						X = int.Parse(AttrAsString(xmlElem, "x", "0")),
+						Y = int.Parse(AttrAsString(xmlElem, "y", "0")),
+						Z = int.Parse(AttrAsString(xmlElem, "z", "0"))
+					}
+				);
+		}
+
+		IMappingOutput ReadXmlOutputs(XmlNode xmlOutputs)
+		{
+
 		}
 
 		int IndexOfSet(XmlNode set)

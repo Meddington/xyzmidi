@@ -202,6 +202,7 @@ namespace xyzmidi.core
 		{
 			Vector4 v1 = providers[0].GetRawVector().Value;
 			Vector4 v2 = providers[1].GetRawVector().Value;
+			
 			return dist(v1.X, v1.Y, v1.Z, v2.X, v2.Y, v2.Z);
 		}
 
@@ -471,9 +472,9 @@ namespace xyzmidi.core
 					{
 						case Tokens.JOINT:  // If the element targets a vector
 						case Tokens.POINT:
-							if (elements[0].axis < 3)
+							if (elements[0].Axis < 3)
 							{ //If axis is either x, y or z
-								int token = elements[0].axis;
+								int token = elements[0].Axis;
 								return token;
 							}
 							return Tokens.NO_FEEDBACK;
@@ -512,7 +513,7 @@ namespace xyzmidi.core
 		public void SetGroup(Boolean value)
 		{
 			IsGroup = value;
-			providers = IsGroup ? processors : elements;
+			providers = new List<IRawValueProvider>(IsGroup ? processors.ToArray<IRawValueProvider>() : elements.ToArray < IRawValueProvider>());
 
 			//Hack for default Min/Max values
 			/*if(getAxis() == Tokens.Z && minValue < 0)
