@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="xyzmidi"
+    targetNamespace="http://tempuri.org/xyzmidi.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/xyzmidi.xsd"
+    xmlns:mstns="http://tempuri.org/xyzmidi.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+	<xs:element name="XyzMidi">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="MappingSet" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="MappingSet">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="Mapping" minOccurs="1" maxOccurs="unbounded" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Mapping">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="Processor" minOccurs="1" maxOccurs="1" />
+				<xs:element name="Output" minOccurs="1" maxOccurs="1" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Processor">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="Processor" minOccurs="0" maxOccurs="unbounded" />
+				<xs:element name="Element" minOccurs="0" maxOccurs="unbounded" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Element">
+		<xs:complexType>
+			<xs:attribute name="type">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="joit">
+							<xs:annotation>
+								<xs:documentation>A Skeleton Joint</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="value">
+							<xs:annotation>
+								<xs:documentation>A predefined custom value</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="point">
+							<xs:annotation>
+								<xs:documentation>A predefined 3D Point that will be used as a Vector (need to precise x, y and z coordinates)</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Output" />
+	
+</xs:schema>

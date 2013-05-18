@@ -11,5 +11,6 @@ namespace xyzmidi.core
 	/// </summary>
 	public interface IMappingOutput
 	{
+		void Send(float[] values);
 	}
 }

@@ -31,7 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Kinect, Version=1.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Kinect, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,9 +41,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Elements\JointElement.cs" />
+    <Compile Include="Elements\PointElement.cs" />
+    <Compile Include="Elements\ValueElement.cs" />
+    <Compile Include="IRawValueProvider.cs" />
+    <Compile Include="Mapping.cs" />
     <Compile Include="MappingElement.cs" />
+    <Compile Include="MappingFeedback.cs" />
+    <Compile Include="MappingManager.cs" />
     <Compile Include="MappingParser.cs" />
     <Compile Include="IMappingOutput.cs" />
+    <Compile Include="MappingProcessor.cs" />
+    <Compile Include="Processors\ActionProcessor.cs" />
+    <Compile Include="Processors\BooleanProcessor.cs" />
+    <Compile Include="Processors\ConditionnalProcessor.cs" />
+    <Compile Include="Processors\DirectProcessor.cs" />
+    <Compile Include="Processors\DistanceProcessor.cs" />
+    <Compile Include="Processors\FilteredProcessor.cs" />
+    <Compile Include="Processors\MappedProcessor.cs" />
+    <Compile Include="Processors\RotationProcessor.cs" />
+    <Compile Include="Processors\TimedProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -51,6 +68,11 @@
       <Project>{F60D8B7B-2D2E-4B94-A736-3783FFE1A25C}</Project>
       <Name>Midi</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="xyzmidi.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
