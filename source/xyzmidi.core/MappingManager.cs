@@ -251,9 +251,103 @@ namespace xyzmidi.core
 				);
 		}
 
-		IMappingOutput ReadXmlOutputs(XmlNode xmlOutputs)
+		List<IMappingOutput> ReadXmlOutputs(XmlNode xmlOutputs)
 		{
+			List<IMappingOutput> outputs = new List<IMappingOutput>();
 
+			foreach (XmlNode xmlChild in xmlOutputs.ChildNodes)
+			{
+				if (xmlChild.Name == "Midi")
+				{
+					// TODO -- 
+					//String midiType = xmlOutput.getString("type", "controller");
+					//int midiDevice = xmlOutput.getInt("device", 0);
+					//int midiChannel = xmlOutput.getInt("channel", 1);
+					//int midiVelocity = xmlOutput.getInt("velocity", 0);
+					//int midiDeviceMap = xmlOutput.getInt("deviceMap", 0);
+					//int midiChannelMap = xmlOutput.getInt("channelMap", 0);
+					//int midiVelocityMap = xmlOutput.getInt("velocityMap", 1);
+					//int midiMinChannel = xmlOutput.getInt("minChannel", 0);
+					//int midiMaxChannel = xmlOutput.getInt("maxChannel", 127);
+					//int midiMinVelocity = xmlOutput.getInt("minVelocity", 0);
+					//int midiMaxVelocity = xmlOutput.getInt("maxVelocity", 127);
+
+					//Boolean midiDistinctNotes = boolean(xmlOutput.getString("distinctNotes", "true"));
+
+					//output = new MappingMIDIOutput(midiType, midiDevice, midiChannel, midiVelocity, midiDeviceMap, midiChannelMap, midiVelocityMap,
+					//								midiMinChannel, midiMaxChannel, midiMinVelocity, midiMaxVelocity, midiDistinctNotes);
+				}
+				else if (xmlChild.Name == "Osc")
+				{
+					// TODO -- 
+					//String oscHost = xmlOutput.getString("host", oscDefaultHost);
+					//String oscAddress = xmlOutput.getString("address", "");
+					//int oscPort = xmlOutput.getInt("port", oscDefaultOutPort);
+					//output = new MappingOSCOutput(oscHost, oscPort, oscAddressPrefix + oscAddress);
+				}
+				else if (xmlChild.Name == "Dmx")
+				{
+					// TODO -- 
+					//int startChannel = xmlOutput.getInt("startChannel", 1);
+					//int minOut = xmlOutput.getInt("minOut", 0);
+					//int maxOut = xmlOutput.getInt("maxOut", 255);
+					//output = new MappingDMXOutput(startChannel, minOut, maxOut);
+				}
+			}
+
+			return outputs;
+		}
+
+		public void ProcessMappings(bool drawFeedback)
+		{
+			float[] values;
+			for (int cnt = 0; cnt < _mappings.Count; cnt++)
+			{
+				values = _mappings[cnt].NormalizedValues;
+				var processor = _mappings[cnt].Processor;
+
+				if (processor.Type == Tokens.ACTION)
+				{
+					if (values[0] == 1)
+					{
+						switch (processor.Action)
+						{
+							case Tokens.CHANGE_SET:
+								ReadSet(processor.File, processor.SetId);
+								return;
+
+							case Tokens.NEXT_SET:
+								ReadNextSet();
+								return;
+
+							case Tokens.PREV_SET:
+								ReadPrevSet();
+								return;
+						}
+					}
+				}
+				else
+				{
+					_mappings[cnt].Send(values);
+					if (drawFeedback)
+						_mappings[cnt].DrawFeedback();
+				}
+			}
+		}
+
+		public void KeyPressed(char keyChar)
+		{
+			int numShortcuts = _shortcuts.Length;
+
+			for (int i = 0; i < numShortcuts; i++)
+			{
+				if (_shortcuts[i] == keyChar)
+				{
+					//println("found shortcut : " + keyChar + " -> setIndex to " + i);
+					ReadSet(i);
+					break;
+				}
+			}
 		}
 
 		int IndexOfSet(XmlNode set)

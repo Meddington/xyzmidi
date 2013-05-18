@@ -431,6 +431,7 @@
 			<xs:choice>
 				<xs:element name="Midi" minOccurs="1" maxOccurs="1" />
 				<xs:element name="Osc" minOccurs="1" maxOccurs="1" />
+				<xs:element name="Dmx" minOccurs="1" maxOccurs="1" />
 			</xs:choice>
 		</xs:complexType>
 	</xs:element>
@@ -476,5 +477,24 @@
 			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
-	
+	<xs:element name="Dmx">
+		<xs:complexType>
+			<xs:attribute name="startChannel" type="xs:int">
+				<xs:annotation>
+					<xs:documentation></xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="minOut" type="xs:int">
+				<xs:annotation>
+					<xs:documentation></xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="maxOut" type="xs:int">
+				<xs:annotation>
+					<xs:documentation></xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+
 </xs:schema>

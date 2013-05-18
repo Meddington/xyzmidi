@@ -15,6 +15,20 @@ namespace xyzmidi.core
 
 		public List<IMappingOutput> Outputs { get; set; }
 
+		public Mapping(string id, string label, MappingProcessor processor, IMappingOutput[] outputs)
+		{
+			Id = id;
+			Label = label;
+			Processor = processor;
+			Outputs = new List<IMappingOutput>(outputs);
+			Feedback = new MappingFeedback(this);
+			Feedback.Mode = (FeedbackMode) processor.GetFeedbackMode();
+			Feedback.IsBoolean = processor.IsBoolean;
+			Feedback.Effect = processor.Effect;
+			Feedback.Label = processor.Label;
+			Feedback.ShowLabel = processor.LabelFeedback;
+		}
+
 		public float[] NormalizedValues
 		{
 			get
