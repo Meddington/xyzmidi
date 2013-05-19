@@ -19,6 +19,8 @@ namespace xyzmidi.core
 		Color _activeBgColor = new Color() { R = 30, G = 30, B = 30 };
 		Color _inactiveBgColor = new Color() { R = 220, G = 17, B = 50 };
 		Color _triggerColor = new Color() { R = 180, G = 220, B = 17 };
+		Pen _pen;
+		Brush _brush;
 
 		public MappingFeedback(Mapping mapping)
 		{
@@ -54,10 +56,10 @@ namespace xyzmidi.core
 				case Tokens.CIRCLE_Z:
 					if (IsBoolean)
 					{
-						DrawBooleanFeedback(screenVecs[0]);
+						DrawBooleanFeedback(ScreenVecs[0]);
 						break;
 					}
-					DrawSingleFeedback(screenVecs[0]);
+					DrawSingleFeedback(ScreenVecs[0]);
 					break;
 
 				case Tokens.LINE_DISTANCE:
@@ -117,11 +119,11 @@ namespace xyzmidi.core
 
 					//fill(bgColor,50);
 
-					DrawValueFullArc(1,distance/2);
+					DrawValueFullArc(1, (float)distance/2);
 					
 					//fill(baseColor,50);
 					//stroke(baseColor);
-					DrawValueFullArc(value,distance/2);
+					DrawValueFullArc(_value, (float)distance/2);
 					//print("rotation :"+value);
 					CreateOffsetLabel(10);
 					break;
@@ -132,7 +134,7 @@ namespace xyzmidi.core
 		{
 			int radius = (Effect == Tokens.TRIGGER) ? 80 : 120;
 			_dc.PushTransform(new TranslateTransform(vec.X, vec.Y));
-			RotateForIndex(Mode);
+			RotateForIndex((int)Mode);
 
 			CreateArcLabel(radius - 20);
 
@@ -151,18 +153,100 @@ namespace xyzmidi.core
 
 		void DrawValueAxisArc(float val, float radius)
 		{
-			DrawValueArc(val, radius, (Math.PI * 2) / 3, (Math.PI * 2) / 10);
+			DrawValueArc(val, radius, (float) (Math.PI * 2) / 3, (float) (Math.PI * 2) / 10);
 		}
 
 		void DrawValueFullArc(float val, float radius)
 		{
-			DrawValueArc(val, radius, Math.PI * 2, 0);
+			DrawValueArc(val, radius, (float) Math.PI * 2, 0);
 		}
 
 		void DrawValueArc(float val, float diameter, float archLength, float gap)
 		{
+			_dc.DrawArc(_pen, _brush, new Rect(new Size(diameter, diameter)), 0, archLength);
+		}
 
-			_dc.DrawArc(
+		void DrawRectValueFeedback(int w, int h)
+		{
+			//pushStyle();
+			//noStroke();
+			//fill(bgColor);
+
+			_dc.DrawRectangle(_brush, _pen, new Rect(new Size(w, h)));
+
+			float rectValue = _value;
+			if (IsBoolean)
+			{
+				//fill(triggerColor,triggerFade);
+				if (Effect == Tokens.TRIGGER)
+				{
+					rectValue = 1;
+				}
+			}
+			else
+			{
+				//fill(12,133,217);
+			}
+
+			_dc.DrawRectangle(_brush, _pen, new Rect(new Size(w*rectValue, h)));
+
+			//popStyle
+		}
+
+		void DrawSingleFeedback(Vector4 vec)
+		{
+			_dc.PushTransform(new TranslateTransform(vec.X, vec.Y));
+			RotateForIndex((int)Mode);
+			CreateArcLabel(40);
+
+			//noFill
+			//strokeCap(SQUARE);
+			//strokeWeight(8);
+			//stroke(bgColor);
+			DrawValueAxisArc(1, 30);
+			//stroke(baseColor);
+			DrawValueAxisArc(_value, 30);    
+		}
+
+		void RotateForIndex(int index)
+		{
+			_dc.PushTransform(new RotateTransform(-Math.PI+Math.PI/4));
+			_dc.PushTransform(new RotateTransform(index*(Math.PI*2)/3));
+		}
+
+		void CreateArcLabel(int offset)
+		{
+			//pushMatrix
+			_dc.PushTransform(new RotateTransform(Math.PI-Math.PI/3+Math.PI/10));
+			CreateOffsetLabel(offset);
+			//popMatrix();
+		}
+
+		void CreateOffsetLabel(int offset)
+		{
+			//pushMatrix
+			_dc.PushTransform(new TranslateTransform(0, -offset));
+			CreateLabel();
+			//popMatrix
+		}
+
+		void CreateLabel()
+		{
+			if (!ShowLabel)
+				return;
+
+			//textMode(MODEL);
+			//rectMode(CENTER);
+			//textAlign(CENTER, BOTTOM);
+
+			//fill(255, 255, 255);
+			//text(label, 0, 0, 80, 40);
+			var text = new FormattedText(Label, null, FlowDirection.LeftToRight, null, 80, _brush);
+			_dc.DrawText(text, new Point(0,0));
+
+			//textAlign(LEFT, TOP);
+			//rectMode(CORNER);
+			//textMode(SCREEN);
 		}
 	}
 
@@ -234,5 +318,8 @@ namespace xyzmidi.core
 			drawing.Geometry = streamGeom;
 			return drawing;
 		}
+
+
+
 	}
 }

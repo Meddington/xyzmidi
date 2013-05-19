@@ -199,9 +199,12 @@ namespace xyzmidi.core
 		{
 			Vector4 v1 = providers[0].GetRawVector().Value;
 			Vector4 v2 = providers[1].GetRawVector().Value;
-			
-			return dist(v1.X, v1.Y, v1.Z, v2.X, v2.Y, v2.Z);
+
+			return Microsoft.Xna.Framework.Vector3.Distance(
+				new Microsoft.Xna.Framework.Vector3(v1.X, v1.Y, v1.Z),
+				new Microsoft.Xna.Framework.Vector3(v2.X, v2.Y, v2.Z));
 		}
+		
 
 		public float GetRawRotation()
 		{
@@ -243,10 +246,16 @@ namespace xyzmidi.core
 					break;
 			}
 
-			float result = degrees(atan2(v2c1 - v1c1, v2c2 - v1c2) + PI);
+			float result = Degrees(Math.Atan2(v2c1 - v1c1, v2c2 - v1c2) + Math.PI);
 			//print("rotation degrees :"+result);
 			return result;
 		}
+
+		public static float Degrees(double angle)
+		{
+			return (float) (Math.PI * angle / 180.0);
+		}
+
 
 		public bool GetBooleanFilterValue()
 		{
@@ -428,26 +437,32 @@ namespace xyzmidi.core
 			return filteredValue;
 		}
 
-		public Vector4?[] getFeedbackVectors()
+		public Vector4[] GetFeedbackVectors()
 		{
 			if (IsGroup && Type != Tokens.DISTANCE && Type != Tokens.ROTATION)
-				return processors[0].getFeedbackVectors();
+				return processors[0].GetFeedbackVectors();
 
-			Vector4?[] vectors = new Vector4?[providers.Count];
 			
-			for (int i = 0; i < vectors.Length; i++)
+			var vectors = new List<Vector4>();
+			
+			for (int i = 0; i < providers.Count; i++)
 			{
-				Vector4? rawVector = (IsGroup || (!IsGroup && elements[i].IsVector)) ? providers[i].GetRawVector() : null;
-				if (rawVector != null)
-				{
-					vectors[i] = new Vector4();
+				Vector4 rawVector;
 
+				if(IsGroup || (!IsGroup && elements[i].IsVector))
+				{
+					if(providers[i].GetRawVector() != null)
+						vectors.Add(providers[i].GetRawVector().Value);
+				}
+				else
+				{
+					rawVector = new Vector4();
 					Context.convertRealWorldToProjective(rawVector, vectors[i]);
 					//println("*** Feedback vector "+vectors[i]);
 				}
 			}
 
-			return vectors;
+			return vectors.ToArray();
 		}
 
 		public int GetFeedbackMode()

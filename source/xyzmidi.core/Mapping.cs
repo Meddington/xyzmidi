@@ -43,7 +43,7 @@ namespace xyzmidi.core
 				return;
 
 			// TODO
-			//Feedback.ScreenVecs = Processor.GetFeedbackVectors();
+			Feedback.ScreenVecs = Processor.GetFeedbackVectors();
 			Feedback.Draw(Processor.IsActive);
 		}
 
